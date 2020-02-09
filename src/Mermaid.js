@@ -1,31 +1,23 @@
-import React, { Component, createRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {mermaidAPI} from 'mermaid';
 
-export default class Mermaid extends Component {
-    constructor(props) {
-        super(props);
-        this.elementRef = createRef();
+export default ({children, id, configs}) => {
+    const elementRef = useRef();
+
+    useEffect(() => {
         mermaidAPI.initialize({
-            startOnLoad: true,
-            flowchart: {
-                useMaxWidth: true,
-                htmlLabels: true,
-                curve: 'cardinal',
-            },
+            ...configs,
             securityLevel: 'loose',
         });
-    }
+    }, [configs]);
 
-    componentDidMount() {
-        const { children, id } = this.props;
+    useEffect(() => {
         mermaidAPI.render(id, children, (content, bindEvents) => {
-            const htmlElement = this.elementRef.current;
+            const htmlElement = elementRef.current;
             htmlElement.innerHTML = content;
             bindEvents(htmlElement);
         });
-    }
+    }, [children, id, configs]);
 
-    render() {
-        return <div ref={this.elementRef}></div>
-    }
+    return <div ref={elementRef}>{children}</div>
 };
